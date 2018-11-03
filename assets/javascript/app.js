@@ -25,7 +25,7 @@ $(document).ready(function () {
   //update clocks
 
   setInterval(function () {
-    $("current-time").html(moment(moment()).format("hh:mm:ss"));
+    $("current-time").html(moment(moment()).format("hh:mm"));
   }, 1000);
 
 
@@ -40,14 +40,6 @@ $(document).ready(function () {
     firstTrain = $("#first-train").val().trim();
     frequency = $("#frequency").val().trim();
 
-    //clear all of the text-boxes
-    $("#train-name").val("");
-    $("#destination").val("");
-    $("#first-train").val('');
-    $("#frequency").val('');
-
-
-
     // Pushing to database
     database.ref().push({
       name: name,
@@ -55,6 +47,13 @@ $(document).ready(function () {
       firstTrain: firstTrain,
       frequency: frequency,
     });
+
+    //clear all of the text-boxes
+    $("#train-name").val("");
+    $("#destination").val("");
+    $("#first-train").val('');
+    $("#frequency").val('');
+
   });
 
 
@@ -72,36 +71,38 @@ $(document).ready(function () {
     var remainder = diffTime % childSnapshot.val().frequency;
     console.log("Remainder: " + remainder);
 
+    // Next train time
+    var nextTrain = moment().add(minAway, "minutes");
+    
+    console.log("Next arrival: " +  moment(nextTrain).format("hh:mm"));
+    var formattedTime = moment(nextTrain).format("hh:mm");
+
+
     // Minutes until next train
     var minAway = childSnapshot.val().frequency - remainder;
     console.log("Time till Train:  " + minAway);
 
-    // Next train time
-    var nextTrain = moment().add(minAway, "minutes");
-    console.log("Next arrival: " +  moment(nextTrain).format("hh:mm"));
+    
+       
+    var newRow = $("<tr>").append(
+      $("<td>").text(name), 
+      $("<td>").text(destination),
+      $("<td>").text(frequency),
+      $("<td>").text(nextTrain),
+      $("<td>").text(minAway)
+      
+    );
 
-
-   
-    $("#add-row > tbody").append("<tr><td>" + childSnapshot.val().name +
-      "</td><td>" + childSnapshot.val().destination +
-      "</td><td>" + childSnapshot.val().frequency +
-      "</td><td>" + nextTrain +
-      "</td><td>" + minAway + "</td></tr>");
-
-
+      $("#train-table > tbody").append(newRow);
+      console.log(newRow);
+    },
 
     // Handle the errors
-  }, function (errorObject) {
+   function (errorObject) {
     console.log("Errors handled: " + errorObject.code);
   });
 
 
 
-  database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function (snapshot) {
-    // Change the HTML to reflect
-    $("#name-display").html(snapshot.val().name);
-    $("#email-display").html(snapshot.val().email);
-    $("#age-display").html(snapshot.val().age);
-    $("#comment-display").html(snapshot.val().comment);
-  });
+  
 })
