@@ -25,21 +25,19 @@ $(document).ready(function () {
   //update clocks
 
   setInterval(function () {
-    $("current-time").html(moment(moment()).format("hh:mm"));
+    $("current-time").text(moment(moment()).format("hh:mm"));
   }, 1000);
 
 
   $("#add-train").on("click", function () {
-
     event.preventDefault();
 
-
     // Storing and retreiving new train data
-    name = $("#train-name").val().trim();
-    destination = $("#destination").val().trim();
-    firstTrain = $("#first-train").val().trim();
-    frequency = $("#frequency").val().trim();
-
+     name = $("#train-name").val().trim();
+     destination = $("#destination").val().trim();
+     firstTrain = $("#first-train").val().trim();
+     frequency = $("#frequency").val().trim();
+    
     // Pushing to database
     database.ref().push({
       name: name,
@@ -59,8 +57,7 @@ $(document).ready(function () {
 
 
   database.ref().on("child_added", function (childSnapshot) {
-    
-    
+        
     // Change year so first train comes before now
     var firstTrainNew = moment(childSnapshot.val().firstTrain, "hh:mm").subtract(1, "years");
 
@@ -72,7 +69,7 @@ $(document).ready(function () {
     console.log("Remainder: " + remainder);
 
     // Next train time
-    var nextTrain = moment().add(minAway, "minutes");
+    var nextTrain = moment().add(minAway, "minutes") 
     
     console.log("Next arrival: " +  moment(nextTrain).format("hh:mm"));
     var formattedTime = moment(nextTrain).format("hh:mm");
@@ -82,16 +79,18 @@ $(document).ready(function () {
     var minAway = childSnapshot.val().frequency - remainder;
     console.log("Time till Train:  " + minAway);
 
-    
+    console.log(name);
        
     var newRow = $("<tr>").append(
-      $("<td>").text(name), 
-      $("<td>").text(destination),
-      $("<td>").text(frequency),
-      $("<td>").text(nextTrain),
+      $("<td>").text(childSnapshot.val().name),
+      $("<td>").text(childSnapshot.val().destination),
+      $("<td>").text(childSnapshot.val().frequency),
+      $("<td>").text(moment(nextTrain).format("hh:mm")),
       $("<td>").text(minAway)
       
+      
     );
+    
 
       $("#train-table > tbody").append(newRow);
       console.log(newRow);
@@ -101,8 +100,6 @@ $(document).ready(function () {
    function (errorObject) {
     console.log("Errors handled: " + errorObject.code);
   });
-
-
 
   
 })
